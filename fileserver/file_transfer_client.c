@@ -7,6 +7,7 @@
 
 #include "global.h"
 
+#define MAX_SIZE 1024*1
 #define SERV_PORT 2500
 
 typedef struct {
@@ -97,7 +98,6 @@ int sendUDP(FileInfo *fi,int sockfd,struct sockaddr *pservaddr,socklen_t servlen
                 unit.chunk_id = 0;
                 //need not dedu
                 unit.chunk_len = 3;
-				strncpy(unit.data,"end", 3);
                 wlen = write(sockfd,&unit,28 + 3);
                 if(wlen !=31)
                 	err_quit("write end flag error:%s\n",strerror(errno));
@@ -140,8 +140,8 @@ int main(int argc ,char *argv[])
         error1= sysinfo(&s_info);
         time1 = s_info.uptime;
         int r;
-		//	FileInfo *fi;
-		fi = file_new();
+//	FileInfo *fi;
+	fi = file_new();
 
         if(argc != 3)
 		err_quit("useage:udpclient<IPaddress>;\n");
@@ -157,8 +157,8 @@ int main(int argc ,char *argv[])
         r = fcntl(sockfd, F_GETFL, 0);
         fcntl(sockfd, F_SETFL, r & ~O_NONBLOCK);
         
-		// chunking file 
-		strcpy(fi->file_path, argv[2]);
+	// chuning file 
+	strcpy(fi->file_path, argv[2]);
         chunk_file(fi);
         printf("File size : %lld\n",fi->file_size);
         printf("Chunk Num : %d\n",fi->chunknum);
@@ -166,7 +166,7 @@ int main(int argc ,char *argv[])
         sendUDP(fi, sockfd, (struct sockaddr *)&servaddr,sizeof(servaddr));        
         close(sockfd);
 	
-		fprintf(stderr,"ServerIP:\t%s\n",argv[1]);        
+	fprintf(stderr,"ServerIP:\t%s\n",argv[1]);        
         if(stat(argv[2],&fsize) == -1)
                 perror("failed to get fiel statusi\n");
         else        
